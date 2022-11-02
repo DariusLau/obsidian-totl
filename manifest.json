@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"isDesktopOnly": false
+  "id": "obsidian-solve",
+  "name": "Obsidian Solve",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.0",
+  "description": "Soulvr, Numbr or Numi for Obsidian. A simple natural expression calculator",
+  "author": "DariusLau",
+  "authorUrl": "https://github.com/DariusLau",
+  "isDesktopOnly": false
 }

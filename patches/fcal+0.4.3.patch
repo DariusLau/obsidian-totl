@@ -1,0 +1,12 @@
+diff --git a/node_modules/fcal/lib/parser/lex/token.js b/node_modules/fcal/lib/parser/lex/token.js
+index ac7b9dd..3e444d9 100644
+--- a/node_modules/fcal/lib/parser/lex/token.js
++++ b/node_modules/fcal/lib/parser/lex/token.js
+@@ -6,6 +6,7 @@ var TT;
+     TT["PLUS"] = "+";
+     TT["MINUS"] = "-";
+     TT["TIMES"] = "*";
++    TT["TIMES"] = "x";
+     TT["MOD"] = "mod";
+     TT["SLASH"] = "/";
+     TT["Number"] = "number";
