@@ -2,9 +2,9 @@
   "id": "obsidian-solve",
   "name": "Obsidian Solve",
   "version": "0.1.0",
-  "minAppVersion": "0.1.0",
-  "description": "Soulvr, Numbr or Numi for Obsidian. A simple natural expression calculator",
+  "minAppVersion": "0.15.0",
+  "description": "Soulvr, Numbr or Numi for Obsidian. Adds a code block option 'solve' that will render a simple natural expression calculator",
   "author": "DariusLau",
-  "authorUrl": "https://github.com/DariusLau",
+  "authorUrl": "https://github.com/DariusLau/obsidian-solve",
   "isDesktopOnly": false
 }

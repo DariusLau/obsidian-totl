@@ -10,8 +10,6 @@ import {
 const { Fcal } = require("fcal");
 const numeral = require("numeral");
 
-// Remember to rename these classes and interfaces!
-
 interface SolvePluginSettings {
   mySetting: string;
   precision: number;
@@ -41,7 +39,33 @@ export default class SolvePlugin extends Plugin {
     // - [ ] Separate left and right layout so selection only copies left col
     // - [ ] Slideable divider?
     // - [x] Light mode and dark mode support
-    // - [ ] Add propper support for * as number multiplier
+    // - [ ] Add propper support for 'x' as number multiplier
+    // - [ ] Test operations with large numebrs e7 (10,000,000 * 10,000,000)
+    // - [ ] Rewrite parsing structure for a more readable logic
+
+    // Parsing Structure
+    // Find formattingKeywords
+    //   Add nodes object with formatting
+    // Find keywords and split arguments.
+    //  A. If keyword do not eval add node with formatting
+    //  B. Split by spaces
+    //      For each fragment
+    //        If contains numbers run through numeral
+    //        Attempt fcal eval of replaced numeral values to calculate row value
+    //        If variable or reserved word from env split add formatting to node
+    //        Else append row value without formatting
+    //        Add unit of row
+    //        If position [1] from fragments exists append node with heading or comment formatting
+
+    // row = {
+    //  "raw": "var = 1,200 km // Comment",
+    //  "fragments": ["var = 1,200km", "// Comment"],
+    //  "fragmentsNumeral": ["var = 1200", "// Comment"],
+    //  "fcalValue": fcalObject,
+    //  "value": "1200",
+    //  "nodes": [{nodeWithFormatting}],
+    //  "rowUnit": "km",
+    // }
 
     this.registerMarkdownCodeBlockProcessor("solve", (source, el, ctx) => {
       const container = el.createEl("div", { cls: "solve-container" });
@@ -73,21 +97,30 @@ export default class SolvePlugin extends Plugin {
 
       const fcal = new Fcal();
       const precision = this.settings.precision;
+
+      // Solve inline keywords, precedence defined by asc order in array
       const keyWords = [
         { "value": "//", "cls": "solve-comment" },
         { "value": "#", "cls": "solve-heading" },
       ];
       const formattingKeywords = [{ "value": "---", "cls": "solve-divider" }];
+      const debug = false;
+      var fcalTest = fcal.evaluate("5156156 + 6156156");
+      console.log("fcalTest", fcalTest);
+      // var fcalTest = fcal.evaluate("EMPRESASRE = 1293");
+      console.log("fcalTest", fcalTest.toFormat());
 
       function fcalToFloat(fcal) {
-        // console.log("fcalToFloat", fcal);
+        console.log("fcalToFloat", fcal, fcal.toFormat());
         var numInDecimal = null;
-        if (fcal.n.d[1] !== undefined) {
-          numInDecimal = fcal.n.d[0] + "." + fcal.n.d[1];
-          // numInDecimal = Number.parseFloat(numInDecimal).toFixed(precision);
-        } else {
-          numInDecimal = fcal.n.d[0];
-        }
+        // if (fcal.n.d[1] !== undefined) {
+        //   numInDecimal = fcal.n.d[0] + "." + fcal.n.d[1];
+        //   // numInDecimal = Number.parseFloat(numInDecimal).toFixed(precision);
+        // } else {
+        //   numInDecimal = fcal.n.d[0];
+        // }
+        numInDecimal = numeral(fcal.toFormat()).value();
+
         // console.log("numeral", numeral(numInDecimal).format("0,0"));
         // console.log("numeral", numeral(numInDecimal).format("0.0"));
         // console.log("fcalToFloat", numInDecimal);
@@ -139,10 +172,25 @@ export default class SolvePlugin extends Plugin {
 
           try {
             // Pass on float value and fcalValue for formatting and data type
-            value = fcalToFloat(fcal.evaluate(calc));
+            console.log("eval calc", calc);
             fcalValue = fcal.evaluate(calc);
+            console.log("calc", calc, value, fcalValue);
+            value = fcalToFloat(fcalValue);
+            // console.log(value, fcalValue);
           } catch (e) {
-            // console.log(e);
+            If fcal string as is evaluation failed, attempt to run value through numeral and fcal
+            This fixes large numbers separated by commas
+            try {
+              // Pass on float value and fcalValue for formatting and data type
+              calc = numeral(calc).value().toString();
+              value = fcalToFloat(fcal.evaluate(calc));
+              fcalValue = fcal.evaluate(calc);
+            } catch (e) {
+              // Number not parseable show empty row
+              console.log("second parse failed", e);
+              console.log(e);
+            }
+            console.log("first parse failed", e);
           }
         } else {
           value = "";
@@ -154,6 +202,8 @@ export default class SolvePlugin extends Plugin {
         env.set("TOTAL");
         env.set("#");
         env.set(`//`);
+
+        console.log("env", env);
 
         // Set default string node, it will be overwritten if there is a
         // keyword, variable or formattingKeyword match
@@ -167,12 +217,14 @@ export default class SolvePlugin extends Plugin {
         });
 
         const nodesArray = nodesString.split("|");
+        console.log("nodeString", nodesString, "nodesArray", nodesArray);
 
         // Overwrite default node and add formatting if it contains variables
         if (nodesArray.length > 1) {
           nodes = [];
           nodesArray.forEach((node) => {
             if (node !== "") {
+              console.log("node ->", node);
               if (env.has(node)) {
                 nodes.push({
                   "nodeType": "span",
@@ -186,6 +238,7 @@ export default class SolvePlugin extends Plugin {
                   "text": node,
                 });
               }
+              console.log("🟥 nodes", nodes);
             }
           });
         }
@@ -196,8 +249,10 @@ export default class SolvePlugin extends Plugin {
           keyWords.forEach((keyWord) => {
             if (node == keyWord.value) {
               // Replace nodes variable with existing nodes up to keyword match
-              const precedingNodes = nodes.slice(0, m - 1);
+              // const precedingNodes = nodes.slice(0, m - 1);
+              const precedingNodes = nodes.slice(0, m);
               nodes = [...precedingNodes];
+              console.log("nodes", nodes, "precedingNodes", precedingNodes, m);
 
               // Flatten all remaining nodes while trimming spaces to avoid double space in join
               const remainingNodes = nodesArray
@@ -224,24 +279,18 @@ export default class SolvePlugin extends Plugin {
               { "nodeType": "div", "cls": formattingKeyword.cls, "text": "" },
             ];
           }
-        });
+        // });
 
-        results[i] =
-          // {
-          //   rows[i],
-          //   numeral(value).value("0,0"),
-          //   calc,
-          //   fcalValue,
-          //   nodes,
-          // },
-          {
-            "originalString": rows[i],
-            "readableNumber": numeral(value).value(),
-            "calculation": calc,
-            "fcalValue": fcalValue,
-            "nodes": nodes,
-          };
+        results[i] = {
+          "originalString": rows[i],
+          "readableNumber": numeral(value).value(),
+          "calculation": calc,
+          "fcalValue": fcalValue,
+          "nodes": nodes,
+          "env": env,
+        };
       }
+      console.log(results);
 
       // Render the block with our results
       for (let j = 0; j < results.length; j++) {
@@ -266,6 +315,7 @@ export default class SolvePlugin extends Plugin {
 
         var formattedValue = results[j].readableNumber;
         if (formattedValue !== null) {
+          // Add number formatting and remove trailing zeroes
           formattedValue = numeral(results[j].readableNumber)
             .format("0,0." + precision)
             .replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, "$1");
@@ -282,7 +332,6 @@ export default class SolvePlugin extends Plugin {
 
         // Bind an onclick event for right hand results
         this.registerDomEvent(rightResultEl, "click", (evt: MouseEvent) => {
-          console.log("from result", evt.target.childNodes[0].textContent);
           navigator.clipboard
             .writeText(evt.target.childNodes[0].textContent)
             .then(
@@ -358,7 +407,6 @@ export default class SolvePlugin extends Plugin {
     // If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
     // Using this function will automatically remove the event listener when this plugin is disabled.
     // this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-    //   console.log("click 🤬", evt);
     // });
 
     // When registering intervals, this function will automatically clear the interval when the plugin is disabled.
@@ -409,19 +457,19 @@ class SolveSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Obsidian Solve Settings" });
 
-    new Setting(containerEl)
-      .setName("Setting #1")
-      .setDesc("It's a secret")
-      .addText((text) =>
-        text
-          .setPlaceholder("Enter your secret")
-          .setValue(this.plugin.settings.mySetting)
-          .onChange(async (value) => {
-            console.log("Secret: " + value);
-            this.plugin.settings.mySetting = value;
-            await this.plugin.saveSettings();
-          }),
-      );
+    // new Setting(containerEl)
+    //   .setName("Setting #1")
+    //   .setDesc("It's a secret")
+    //   .addText((text) =>
+    //     text
+    //       .setPlaceholder("Enter your secret")
+    //       .setValue(this.plugin.settings.mySetting)
+    //       .onChange(async (value) => {
+    //         console.log("Secret: " + value);
+    //         this.plugin.settings.mySetting = value;
+    //         await this.plugin.saveSettings();
+    //       }),
+    //   );
 
     new Setting(containerEl)
       .setName("Decimals")

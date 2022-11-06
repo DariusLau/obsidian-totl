@@ -107,6 +107,7 @@ If your plugin does not need CSS, delete this file.
   padding: 0 0.4rem;
   display: inline-block;
   color: rgb(80, 193, 80);
+  user-select: none;
 }
 .solve-right-result:hover {
   background-color: rgb(0, 157, 0);
