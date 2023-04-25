@@ -25,6 +25,6 @@
   "dependencies": {
     "fcal": "^0.4.3",
     "numeral": "^2.0.6",
-    "patch-package": "^6.5.0"
+    "patch-package": "^7.0.0"
   }
 }
