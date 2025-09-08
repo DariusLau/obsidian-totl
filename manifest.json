@@ -1,10 +1,10 @@
 {
-  "id": "obsidian-solve",
-  "name": "Obsidian Solve",
-  "version": "0.1.0",
-  "minAppVersion": "0.15.0",
-  "description": "Soulvr, Numbr or Numi for Obsidian. Adds a code block option 'solve' that will render a simple natural expression calculator",
-  "author": "DariusLau",
-  "authorUrl": "https://github.com/DariusLau/obsidian-solve",
-  "isDesktopOnly": false
+	"id": "obsidian-totl",
+	"name": "Obsidian Totl",
+	"version": "0.1.0",
+	"minAppVersion": "0.15.0",
+	"description": "Soulvr, Numbr or Numi for Obsidian. Adds a code block option 'totl' that will render a simple text and numbers calculator",
+	"author": "DariusLau",
+	"authorUrl": "https://github.com/DariusLau/obsidian-totl",
+	"isDesktopOnly": false
 }

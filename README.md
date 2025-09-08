@@ -1,18 +1,18 @@
-# Obsidian Solve
+# Obsidian Totl
 
 A simple calculator like Solvr, Numbr or Numi.
 
-This Obsidian Plugin adds a new code block type `solve` that will calculate all operations in the code block and display them in a right hand column.
+This Obsidian Plugin adds a new code block type `totl` that will calculate all operations in the code block and display them in a right hand column.
 
 ## Usage
 
-Start a new code block using backticks "```" and write solve as the code block type, all values contained inside will be calculated when the code block is exited
+Start a new code block using backticks "```" and write `totl` as the code block type, all values contained inside will be calculated when the code block is exited
 
 ![obsidian-solve](https://user-images.githubusercontent.com/1715356/199854778-4386b2b0-dfff-433f-b0d3-50729678b2ff.gif)
 
 ## Example
 
-```solve
+```totl
 
 variable = 123
 num = 8382
@@ -57,7 +57,7 @@ Obsidian Solve allows the following operators
 
 Obsidian Solve supports units when added to every line item
 
-```solve
+```totl
 100 km
 100 mi
 ```
